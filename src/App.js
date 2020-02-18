@@ -15,7 +15,6 @@ class App extends React.Component {
     this.state = {
       tableData: [],
     }
-
   }
   
   onFormSubmit = (data) => {
@@ -23,14 +22,17 @@ class App extends React.Component {
     if (result) {
       result.unique_words = result.data.length;
       this.setState(prevState => ({tableData: [result, ... prevState.tableData]}),
-        this.setState({r: result.r, alpha: result.alpha, data: result.data, t: result.t, word_count: result.word_count, ll: result.ll})
+        this.setState({r: result.r,alpha: result.alpha, data: result.data, actual: result.actual, expected: result.expected, t: result.t, word_count: result.word_count, ll: result.ll})
+
+        // this.setState({r: result.r, alpha: result.alpha, data: result.data, t: result.t, word_count: result.word_count, ll: result.ll})
       )
     }
   }
 
   renderHist = () => {
-    if (this.state.data && this.state.r && this.state.alpha && this.state.word_count && this.state.t) {
-      return <Histogram data={this.state.data} r={this.state.r} alpha={this.state.alpha} t={this.state.t} word_count={this.state.word_count}/>
+    if ( this.state.r && this.state.alpha && this.state.word_count && this.state.t) {
+      // return <Histogram data={this.state.data} r={this.state.r} alpha={this.state.alpha} t={this.state.t} word_count={this.state.word_count}/>
+      return <Histogram data={this.state.data} actual={this.state.actual} expected={this.state.expected}  r={this.state.r} alpha={this.state.alpha} t={this.state.t} word_count={this.state.word_count}/>
     }
   }
   render()  { 
