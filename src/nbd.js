@@ -8,15 +8,75 @@ const nlpEx  = nlp.extend(ngrams);
 
 // Look at the frequency distribution of words within a document.
 const frequency = (doc) => {
-    return doc.unigrams().map(obj => obj.count);
+    let unigrams = doc.unigrams();
+    let results = [];
+    let words = [];
+    for (var i in unigrams) {
+        if (unigrams[i].normal != "") {
+            results.push(unigrams[i].count);
+            words.push(unigrams[i].normal)
+        }
+    }
+    return results;
 }
 
 // look at the length distributionof words within a document
 const length = (doc) => {
-    return doc.unigrams().map(obj => obj.normal.length);
+    let unigrams = doc.unigrams();
+    let results = [];
+    for (var i in unigrams) {
+        if (unigrams[i].normal != "") results.push(unigrams[i].normal.length);
+    }
+    return results;
+}
+
+// num_splits = number of sections, minimum 2;
+const find_splits = (num_splits, text) => {
+    let length = text.length;
+    let split_size = length / num_splits;
+    let splits = []
+    let prev_index = 0;
+    for (var i = 1; i <= num_splits; i++) {
+        let next_index = i * split_size;
+        while (next_index < length && text.charAt(next_index) != ' ')  {
+            next_index++;
+        }
+        splits.push(text.slice(prev_index, next_index));
+        prev_index = next_index
+    }
+    return splits;
+}
+
+const computeMeanRForSplit = (num_splits, text) => {
+    let splits = find_splits(num_splits, text);
+    let average_r = 0;
+    let average_ttr = 0;
+    for (const i in splits) {
+        let doc = nlpEx(splits[i]);
+        let data = frequency(doc)
+        let t = doc.sentences().length;
+        let hist = compute_hist(data); // histogram basically, actuals[i] = # of words with frequency i
+        let result = fmin.nelderMead(p_x_hist(hist, t), [1, 1], null);
+        average_r += result.x[0];
+        average_ttr += data.length / doc.wordCount()
+    }
+    return {'r': average_r / splits.length, 'ttr': average_ttr / splits.length};
+}
+
+export const LOB = (text) => {
+    let splits = [1,2,3,4,5,6,7,8,10,13,20];
+    let average_r = []
+    let average_ttr = []
+    for (var s in splits) {
+        let results = computeMeanRForSplit(splits[s], text)
+        average_r.push(results.r);
+        average_ttr.push(results.ttr)
+    }
+    return {'r': average_r, 'ttr': average_ttr};
 }
 
 export const nbd = (text, type) => {
+    // let lob = LOB(text);
     let doc = nlpEx(text);
     let data = [];
     switch(type) {
@@ -36,10 +96,8 @@ export const nbd = (text, type) => {
     let r = result.x[0];
     let alpha = result.x[1];
     let ll = -result.fx;
-
     
-    
-    let expecteds = compute_expected(r, alpha, doc.unigrams().length, hist.length, t); // expecteds[i] = # of words with frequency i
+    let expecteds = compute_expected(r, alpha, data.length, hist.length, t); // expecteds[i] = # of words with frequency i
 
     let {chisq, df} = CHISQ(hist, expecteds, 2);
 
@@ -55,6 +113,8 @@ export const nbd = (text, type) => {
         'actual': hist,
         'expected': expecteds,
         'unique_words': data.length,
+        // 'lob_r': lob.r,
+        // 'lob_ttr': lob.ttr
     };
 }
 
@@ -74,7 +134,7 @@ let p_x_hist = (hist, t) => {
 }
 
 let p_x = (x, r, alpha, t) => {
-    return Math.exp(LogGamma(r+x-1))/(factorial(x)*Math.exp(LogGamma(r)))*Math.pow(alpha/(alpha+t),r)*Math.pow(t/(alpha+t),x);
+    return Math.exp(LogGamma(r+x))/(factorial(x)*Math.exp(LogGamma(r)))*Math.pow(alpha/(alpha+t),r)*Math.pow(t/(alpha+t),x);
 }
 
 let LL = (p_x) => {
@@ -118,6 +178,7 @@ let CHISQ = (actual, expected, num_params) => {
     if (actual.length != expected.length) return null;
     let val = 0;
     let i = 1;
+    
     while (i < actual.length && actual[i]) {
         if (expected[i] > 0) {
             val += (actual[i] - expected[i]) * (actual[i] - expected[i]) / expected[i];
@@ -125,18 +186,20 @@ let CHISQ = (actual, expected, num_params) => {
         i++;
     }
 
+    let df = i - num_params - 2;
+    
     let right_censor_actual = 0;
     let right_censor_expected = 0;
-    let df = i + 1 - num_params
     while (i < actual.length) {
         right_censor_actual += actual[i] ? actual[i] : 0;
         right_censor_expected += expected[i] ? expected[i] : 0;
         i++;
     }
+    if (df <= 0) df = 1;
+    
     if (right_censor_actual && right_censor_expected) {
         val += (right_censor_actual - right_censor_expected) * (right_censor_actual - right_censor_expected) / right_censor_expected;
     }
-
     return {'chisq': chisquaredtest(val, df), 'df': df};
 }
 

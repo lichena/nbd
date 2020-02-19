@@ -22,16 +22,24 @@ class App extends React.Component {
     if (result) {
       result.unique_words = result.data.length;
       this.setState(prevState => ({tableData: [result, ... prevState.tableData]}),
-        this.setState({r: result.r,alpha: result.alpha, data: result.data, actual: result.actual, expected: result.expected, t: result.t, word_count: result.word_count, ll: result.ll})
-
-        // this.setState({r: result.r, alpha: result.alpha, data: result.data, t: result.t, word_count: result.word_count, ll: result.ll})
+        this.setState({
+          r: result.r,
+          alpha: result.alpha, 
+          data: result.data, 
+          actual: result.actual, 
+          expected: result.expected, 
+          t: result.t, 
+          word_count: result.word_count, 
+          ll: result.ll,
+          // lob_r: result.lob_r,
+          // lob_ttr: result.lob_ttr
+        })
       )
     }
   }
 
   renderHist = () => {
     if ( this.state.r && this.state.alpha && this.state.word_count && this.state.t) {
-      // return <Histogram data={this.state.data} r={this.state.r} alpha={this.state.alpha} t={this.state.t} word_count={this.state.word_count}/>
       return <Histogram data={this.state.data} actual={this.state.actual} expected={this.state.expected}  r={this.state.r} alpha={this.state.alpha} t={this.state.t} word_count={this.state.word_count}/>
     }
   }
@@ -47,12 +55,6 @@ class App extends React.Component {
         <div style={tableStyle}>
           <Table columns={columns} data={this.state.tableData}/>
         </div>
-        {/* <p>{this.state.r ? 'r is '+ this.state.r : ''}</p>
-        <p>{this.state.alpha ? 'alpha is ' + this.state.alpha.toFixed(3) : ''}</p>
-        <p>{this.state.t ? 't is ' + this.state.t : ''}</p>
-        <p>{this.state.ll ? 'Log-Likelihood is ' + this.state.ll.toFixed(3) : ''}</p>
-        <p>{this.state.data ? 'number of unique words is ' + this.state.data.length : ''}</p>
-        <p>{this.state.word_count ? 'number of total words is ' + this.state.word_count : ''}</p> */}
       </div>
     );
   }
@@ -112,7 +114,6 @@ const columns = [
       },
     ],
   },
-  
 ]
 
 function Table({ columns, data }) {

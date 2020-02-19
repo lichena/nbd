@@ -16,7 +16,6 @@ const draw = (props) => {
     let expected = props.expected;
     let bins = []
     for (var i = 1; i < actual.length; i++) {
-        // let bin_actual = [actual[i] ? actual[i] : 0];
         let bin_actual = {};
         bin_actual.val = actual[i] ? actual[i] : 0;
         bin_actual.x0 = i;
@@ -33,8 +32,6 @@ const draw = (props) => {
         bins.push(bin_expected)
     }
 
-    // let data = props.data;
-    // let data = props.data;
     let r = props.r;
     let alpha = props.alpha;
     let t = props.t;
@@ -42,9 +39,6 @@ const draw = (props) => {
 
     
     d3.select('.histogram > *').remove(); // remove previous hist
-
-    // let x_range = 20;
-    // let num_bins = actual.length;
 
     // set the dimensions and margins of the graph
     var margin = {top: 10, right: 30, bottom: 30, left: 40},
@@ -104,43 +98,6 @@ const draw = (props) => {
     svg.append("circle").attr("cx",200).attr("cy",160).attr("r", 6).style("fill", "#404080")
     svg.append("text").attr("x", 220).attr("y", 130).text("Actual").style("font-size", "15px").attr("alignment-baseline","middle")
     svg.append("text").attr("x", 220).attr("y", 160).text("Expected").style("font-size", "15px").attr("alignment-baseline","middle")
-
-            // //Legend
-            // legend = svg.append("g")
-            //     .attr("class","legend")
-            //     .attr("transform","translate(50,30)")
-            //     .style("font-size","12px")
-            //     .call(d3.legend)
-    // var legend = svg.selectAll(".legend")
-    //     .data(bins[0].values.map(function(d) { return d.type; }).reverse())
-    //     .enter().append("g")
-    //     .attr("class", "legend")
-    //     .attr("transform", function(d,i) { return "translate(0," + i * 20 + ")"; })
-    //     .style("opacity","0");
-
-    // legend.append("rect")
-    //     .attr("x", width - 18)
-    //     .attr("width", 18)
-    //     .attr("height", 18)
-    //     .style("fill", function(d) { return '#000000'; });
-    //     // .style("fill", function(d) { return color(d); });
-
-    // legend.append("text")
-    //     .attr("x", width - 24)
-    //     .attr("y", 9)
-    //     .attr("dy", ".35em")
-    //     .style("text-anchor", "end")
-    //     .text(function(d) {return d; });
-    // graph the function
-    // var continuous = graph_nbd(r, alpha, t, word_count);
-
-    // svg.append("svg:path")
-    //     .attr("d", function(d) { return d3.line() (
-    //     x.ticks(100).map(function(xi) {
-    //         return [ x(xi+0.5), y(continuous(xi)) ]
-    //     }))})
-    //     .style("stroke", "red")    // set the line colour
-    //     .style("fill", "none");    // set the fill colour 
 }
 
   export default Histogram;
